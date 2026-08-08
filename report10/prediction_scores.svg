@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="390" viewBox="0 0 620 390">
+<style>
+  text { font-family: Arial, Helvetica, sans-serif; fill: #2c3e50; }
+  .title { font-size: 22px; font-weight: 700; }
+  .subtitle { font-size: 13px; fill: #7f8c8d; }
+  .label { font-size: 13px; }
+  .small { font-size: 12px; fill: #7f8c8d; }
+  .value { font-size: 13px; font-weight: 700; }
+</style>
+<rect width="100%" height="100%" fill="white"/>
+<text x="32" y="38" class="title" text-anchor="start">Candidate Item Prediction Scores</text>
+<text x="32" y="61" class="subtitle" text-anchor="start">Simple sum over the top-2 similar users: user 1 and user 4.</text>
+<line x1="76" y1="92" x2="76" y2="302" stroke="#d6dee6" stroke-width="1"/>
+<line x1="76" y1="302" x2="546" y2="302" stroke="#d6dee6" stroke-width="1"/>
+<line x1="71" y1="302.0" x2="546" y2="302.0" stroke="#edf1f5" stroke-width="1"/>
+<text x="62" y="306.0" class="small" text-anchor="end">0</text>
+<line x1="71" y1="197.0" x2="546" y2="197.0" stroke="#edf1f5" stroke-width="1"/>
+<text x="62" y="201.0" class="small" text-anchor="end">1</text>
+<line x1="71" y1="92.0" x2="546" y2="92.0" stroke="#edf1f5" stroke-width="1"/>
+<text x="62" y="96.0" class="small" text-anchor="end">2</text>
+<rect x="110.46666666666664" y="197.0" width="87.73333333333333" height="105.0" rx="7" fill="#3498db" stroke="none" stroke-width="1"/>
+<text x="154.33333333333331" y="187.0" class="value" text-anchor="middle" fill="#3498db">1</text>
+<text x="154.33333333333331" y="328" class="label" text-anchor="middle">item 3</text>
+<rect x="262.1333333333333" y="85.0" width="97.73333333333333" height="224.0" rx="8" fill="#fff4e7" stroke="none" stroke-width="1"/>
+<rect x="267.1333333333333" y="92.0" width="87.73333333333333" height="210.0" rx="7" fill="#e67e22" stroke="none" stroke-width="1"/>
+<text x="311.0" y="82.0" class="value" text-anchor="middle" fill="#e67e22">2</text>
+<text x="311.0" y="328" class="label" text-anchor="middle">item 5</text>
+<rect x="423.79999999999995" y="197.0" width="87.73333333333333" height="105.0" rx="7" fill="#3498db" stroke="none" stroke-width="1"/>
+<text x="467.66666666666663" y="187.0" class="value" text-anchor="middle" fill="#3498db">1</text>
+<text x="467.66666666666663" y="328" class="label" text-anchor="middle">item 6</text>
+<text x="310.0" y="350" class="subtitle" text-anchor="middle">Highlighted result: item 5</text>
+</svg>

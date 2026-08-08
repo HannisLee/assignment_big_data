@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="390" viewBox="0 0 620 390">
+<style>
+  text { font-family: Arial, Helvetica, sans-serif; fill: #2c3e50; }
+  .title { font-size: 22px; font-weight: 700; }
+  .subtitle { font-size: 13px; fill: #7f8c8d; }
+  .label { font-size: 13px; }
+  .small { font-size: 12px; fill: #7f8c8d; }
+  .value { font-size: 13px; font-weight: 700; }
+</style>
+<rect width="100%" height="100%" fill="white"/>
+<text x="32" y="38" class="title" text-anchor="start">Inner Product Similarity</text>
+<text x="32" y="61" class="subtitle" text-anchor="start">Similarity between each non-target user and target user 6.</text>
+<line x1="76" y1="92" x2="76" y2="302" stroke="#d6dee6" stroke-width="1"/>
+<line x1="76" y1="302" x2="546" y2="302" stroke="#d6dee6" stroke-width="1"/>
+<line x1="71" y1="302.0" x2="546" y2="302.0" stroke="#edf1f5" stroke-width="1"/>
+<text x="62" y="306.0" class="small" text-anchor="end">0</text>
+<line x1="71" y1="197.0" x2="546" y2="197.0" stroke="#edf1f5" stroke-width="1"/>
+<text x="62" y="201.0" class="small" text-anchor="end">1</text>
+<line x1="71" y1="92.0" x2="546" y2="92.0" stroke="#edf1f5" stroke-width="1"/>
+<text x="62" y="96.0" class="small" text-anchor="end">2</text>
+<rect x="91.67999999999999" y="85.0" width="62.64000000000001" height="224.0" rx="8" fill="#fff4e7" stroke="none" stroke-width="1"/>
+<rect x="96.67999999999999" y="92.0" width="52.64000000000001" height="210.0" rx="7" fill="#e67e22" stroke="none" stroke-width="1"/>
+<text x="123.0" y="82.0" class="value" text-anchor="middle" fill="#e67e22">2</text>
+<text x="123.0" y="328" class="label" text-anchor="middle">user 1</text>
+<rect x="190.68" y="197.0" width="52.64000000000001" height="105.0" rx="7" fill="#3498db" stroke="none" stroke-width="1"/>
+<text x="217.0" y="187.0" class="value" text-anchor="middle" fill="#3498db">1</text>
+<text x="217.0" y="328" class="label" text-anchor="middle">user 2</text>
+<rect x="284.68" y="197.0" width="52.64000000000001" height="105.0" rx="7" fill="#3498db" stroke="none" stroke-width="1"/>
+<text x="311.0" y="187.0" class="value" text-anchor="middle" fill="#3498db">1</text>
+<text x="311.0" y="328" class="label" text-anchor="middle">user 3</text>
+<rect x="373.68" y="85.0" width="62.64000000000001" height="224.0" rx="8" fill="#fff4e7" stroke="none" stroke-width="1"/>
+<rect x="378.68" y="92.0" width="52.64000000000001" height="210.0" rx="7" fill="#e67e22" stroke="none" stroke-width="1"/>
+<text x="405.0" y="82.0" class="value" text-anchor="middle" fill="#e67e22">2</text>
+<text x="405.0" y="328" class="label" text-anchor="middle">user 4</text>
+<rect x="472.68" y="302.0" width="52.64000000000001" height="0.0" rx="7" fill="#3498db" stroke="none" stroke-width="1"/>
+<text x="499.0" y="292.0" class="value" text-anchor="middle" fill="#3498db">0</text>
+<text x="499.0" y="328" class="label" text-anchor="middle">user 5</text>
+<text x="310.0" y="350" class="subtitle" text-anchor="middle">Highlighted result: user 1, user 4</text>
+</svg>

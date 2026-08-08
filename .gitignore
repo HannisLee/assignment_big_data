@@ -21,3 +21,9 @@ Thumbs.db
 
 # Data (npz intermediate files)
 *.npz
+
+# 大二进制 / 自动生成文件，不传 GitHub
+*.pdf
+*.docx
+*.html
+.claude/

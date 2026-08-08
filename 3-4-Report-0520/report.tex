@@ -1,0 +1,145 @@
+\documentclass[a4paper,11pt]{article}
+
+% A4 layout with tight margins for max 4 pages
+\usepackage[margin=2cm]{geometry}
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage{cite}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{float}
+
+\title{\vspace{-1.5cm}Why Does the Shuffle Phase Dominate MapReduce Performance Overhead, and How Do Row Compression and In-Mapper Combining Differ in Addressing This Bottleneck?}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+%--------------------------------------------------------------------
+\section{Introduction}
+
+The exponential growth of data in modern computing has driven the adoption of cluster-based parallel processing frameworks. MapReduce, introduced by Dean and Ghemawat at Google in 2004~\cite{dean2004}, became the dominant paradigm for large-scale data processing by abstracting parallel programming complexity behind two user-defined functions: \textit{map} and \textit{reduce}. Its success---and its open-source implementation Hadoop---pioneered enterprise cluster computing by allowing programmers to scale out across thousands of commodity machines without managing data distribution, failure recovery, or inter-node communication directly.
+
+However, MapReduce's abstraction comes at a performance cost. A well-documented problem is that the \textbf{shuffle phase}---the all-to-all transfer of intermediate key-value pairs (KVPs) between mappers and reducers---frequently dominates total job execution time~\cite{lin2010}. This report investigates the following research question:
+
+\begin{quote}
+\textbf{Why does the shuffle phase dominate MapReduce performance overhead, and how do Row Compression and In-Mapper Combining differ in addressing this bottleneck?}
+\end{quote}
+
+I chose this RQ because it is directly grounded in the lecture material (2025FCS Week 2, Okita M., Osaka University), which presents a concrete research case comparing two intermediate-data reduction techniques---Row Compression and In-Mapper Combining---with experimental PageRank results demonstrating a 68.4\% reduction in KVP count and an 87.5\% reduction in transferred data size. Critically, the RQ demands an \textit{analytical comparison} rather than a descriptive survey, making it well-defined and evaluable.
+
+%--------------------------------------------------------------------
+\section{Background: MapReduce and the Shuffle Bottleneck}
+
+\subsection{The MapReduce Execution Model}
+
+A MapReduce job proceeds through three phases: map, shuffle, and reduce. In the map phase, each mapper independently processes an input split and emits intermediate KVPs to local storage. The shuffle phase then redistributes these KVPs across the network so that all values sharing the same key arrive at a single reducer node~\cite{white2015}. Finally, the reduce phase applies the user-defined reduce function to each key-group to produce the final output.
+
+Key to MapReduce's design is the \textbf{owner-computation rule}: tasks are assigned to the node that holds the required data, rather than moving data to a processor. This epoch-making idea, as described in the lecture, avoids large-scale data movement during the map phase. However, it introduces a fundamental tension: while mappers read locally, intermediate data must be redistributed by key, producing unavoidable cross-node traffic.
+
+\subsection{Why Shuffle Becomes the Bottleneck}
+
+The shuffle phase creates performance pressure through three compounding mechanisms:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{All-to-all communication pattern.} Each mapper partitions its output across all reducers. With $M$ mappers and $R$ reducers, the shuffle phase generates $M \times R$ distinct data flows. This quadratic growth in communication paths means the network becomes a shared, congested resource as either the data size or the cluster size increases~\cite{dean2004}.
+
+    \item \textbf{Intermediate data amplification.} Many MapReduce programs produce far more intermediate data than input data. For example, in iterative graph algorithms such as PageRank, each vertex propagates its current value to every neighboring vertex, producing intermediate KVPs proportional to the number of edges rather than vertices. In the lecture's experimental results, intermediate KVP size before optimization was the dominant cost driver.
+
+    \item \textbf{Disk I/O coupling.} Before being transferred, map outputs are first written to disk (spill), then read back for network transmission. At the reduce side, incoming KVPs are buffered, merged, and sorted---disk operations that compete with network I/O for bandwidth and I/O scheduler attention~\cite{condie2010}.
+\end{enumerate}
+
+These factors together mean that even when map and reduce functions are computationally simple, the shuffle phase can consume the majority of job completion time. This insight motivates the central optimization goal described in the lecture: reducing the volume of intermediate KVPs exchanged between nodes.
+
+%--------------------------------------------------------------------
+\section{Analysis: Comparing Two Reduction Strategies}
+
+The research introduction in the lecture identifies a key insight: many intermediate KVPs are \textit{redundant}---they carry the same value for the same key. Removing these redundant KVPs reduces network traffic. Two strategies to achieve this are In-Mapper Combining and Row Compression. They differ fundamentally in \textit{direction of reduction}, \textit{operation constraints}, and \textit{runtime trade-offs}.
+
+\subsection{In-Mapper Combining}
+
+In-Mapper Combining, formalized by Lin and Dyer~\cite{lin2010}, performs \textbf{column-wise pre-aggregation} of intermediate KVPs within a single mapper before any data leaves the node. Instead of emitting one KVP per input record, the mapper maintains an in-memory associative array, aggregating values by key across multiple input records, and emits only the aggregated result when the mapper completes.
+
+\textbf{Advantages.} First, because aggregation occurs before serialization and disk spill, the number of KVPs transmitted is drastically reduced---to at most one per unique key. Second, no change to the reducer is required; the reduce function receives pre-aggregated values and operates as usual.
+
+\textbf{Fundamental limitation.} In-Mapper Combining requires the reduce operation to be \textit{associative and commutative}~\cite{lin2010}. For operations like summation or counting (e.g., WordCount), partial aggregates can be freely combined and the final reducer simply sums the partial sums. However, for operations where the \textit{order} or \textit{identity} of values matters---graph propagation (PageRank), ranking, or any algorithm where each value's contribution depends on which key it originated from---pre-aggregation inside a mapper would corrupt the semantics of the computation. The lecture's research case explicitly notes this constraint: In-Mapper Combining is ``available for associative and commutative reduction only.''
+
+An additional practical limitation is memory pressure. The in-mapper associative array must hold all unique keys encountered by a single mapper. For datasets with high key cardinality, this array can exhaust available memory, requiring periodic flushing that reduces the combining effectiveness~\cite{lin2010}.
+
+\subsection{Row Compression}
+
+Row Compression, the method proposed in the lecture's research introduction, takes a \textbf{row-wise} approach. Instead of aggregating values across different keys (column-wise), it compresses \textit{repeated values that share the same key} into a compact representation. In the PageRank example, where a vertex propagates an identical value to all its neighbors, Row Compression groups these identical KVPs together and transfers them as a single compressed unit.
+
+\textbf{Key advantage: generality.} Unlike In-Mapper Combining, Row Compression does \textit{not} require associativity or commutativity. It removes only identical duplicate values, preserving the one-to-one mapping between each source--destination pair that non-associative operations depend on. The reduction simply identifies rows where each value is the same and encodes them compactly. This makes Row Compression applicable to a broader class of algorithms---particularly graph propagation algorithms such as PageRank, HITS, and belief propagation, where each node distributes the same message to all neighbors.
+
+\textbf{Computational cost.} The trade-off is that compressed rows must be \textit{expanded} during the reduce phase to reconstruct the original KVP stream. This adds computation on the reduce side that In-Mapper Combining avoids entirely. Whether this cost is justified depends on the ratio of compression achieved versus the expansion overhead.
+
+\subsection{Comparative Summary}
+
+Table~\ref{tab:comparison} synthesizes the differences between the two approaches across four decision-relevant dimensions.
+
+\begin{table}[H]
+\centering
+\caption{Comparison of In-Mapper Combining and Row Compression}
+\label{tab:comparison}
+\begin{tabular}{@{}p{3.5cm} p{5cm} p{5cm}@{}}
+\toprule
+\textbf{Dimension} & \textbf{In-Mapper Combining} & \textbf{Row Compression} \\
+\midrule
+Reduction direction & Column-wise (across keys) & Row-wise (within a key) \\
+Operation constraint & Associative \& commutative only & None (any operation) \\
+Reduce-phase overhead & None & Expansion of compressed data \\
+Memory bottleneck & In-mapper associative array & None (per-row processing) \\
+Best suited for & Aggregation (sum, count, average) & Graph propagation, ranking, non-associative operations \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The lecture's experimental results provide quantitative validation: for the PageRank algorithm on a web graph, Row Compression reduced the number of intermediate KVPs by 68.4\% and the total transferred data size by 87.5\%. The 87.5\% data-size reduction being larger than the 68.4\% KVP-count reduction indicates that Row Compression not only removed duplicate KVPs but also compacted the representation of remaining data---a benefit In-Mapper Combining cannot achieve for non-associative operations like PageRank because it simply cannot be applied to them at all.
+
+\textbf{The central insight} is that the choice between these two techniques is not a simple ``which is better'' question, but depends on the algorithmic properties of the target application. For associative reductions, In-Mapper Combining is optimal because it eliminates per-key overhead entirely without adding reduce-phase work. For non-associative operations, Row Compression offers a previously unavailable optimization path, filling a gap left by In-Mapper Combining's constraints. This complementarity suggests that a hybrid strategy---applying In-Mapper Combining to associative sub-computations and Row Compression to the rest---could be a promising direction for general-purpose MapReduce optimizers.
+
+%--------------------------------------------------------------------
+\section{Conclusion}
+
+This report investigated why the shuffle phase dominates MapReduce performance and how two intermediate-data reduction strategies differ in addressing it. The findings are as follows.
+
+The shuffle phase is the dominant bottleneck because it imposes an all-to-all communication pattern ($M \times R$ data flows) that grows quadratically with cluster scale, amplifies intermediate data beyond the input size (especially in iterative graph algorithms), and couples network I/O with disk I/O at both the map-output and reduce-input stages.
+
+In-Mapper Combining mitigates this bottleneck through column-wise pre-aggregation within mappers, reducing KVP count to at most one per unique key. However, it is constrained to associative and commutative operations, limiting its applicability to aggregation-style computations. Row Compression takes a complementary, row-wise approach by removing duplicate values within each key's output. It is not constrained by associativity requirements, making it particularly effective for graph propagation algorithms such as PageRank---where it achieved a 68.4\% KVP reduction and 87.5\% data-size reduction in the lecture's experiments. The trade-off is an added expansion step in the reduce phase.
+
+In essence, the two techniques optimize different dimensions of the shuffle bottleneck: In-Mapper Combining trades generality for zero reducer overhead, while Row Compression trades reducer-side computation for broader applicability. Neither technique is universally superior; their effectiveness depends on the algorithmic characteristics of the target workload. Future work on MapReduce optimization should explore adaptive frameworks that select the appropriate reduction strategy based on static analysis of the reduce function's algebraic properties.
+
+%--------------------------------------------------------------------
+\begin{thebibliography}{10}
+
+\bibitem{dean2004}
+J.~Dean and S.~Ghemawat,
+``MapReduce: Simplified data processing on large clusters,''
+in \textit{Proc. 6th Symp. Operating Systems Design and Implementation (OSDI)}, San Francisco, CA, 2004, pp. 137--150.
+
+\bibitem{lin2010}
+J.~Lin and C.~Dyer,
+\textit{Data-Intensive Text Processing with MapReduce}.
+San Rafael, CA: Morgan \& Claypool, 2010.
+
+\bibitem{white2015}
+T.~White,
+\textit{Hadoop: The Definitive Guide}, 4th ed.
+Sebastopol, CA: O'Reilly Media, 2015.
+
+\bibitem{condie2010}
+T.~Condie, N.~Conway, P.~Alvaro, J.~M.~Hellerstein, K.~Elmeleegy, and R.~Sears,
+``MapReduce online,''
+in \textit{Proc. 7th USENIX Symp. Networked Systems Design and Implementation (NSDI)}, San Jose, CA, 2010, pp. 313--328.
+
+\bibitem{okita2025}
+M.~Okita,
+``Fundamentals of Computer Science,'' Week 2 Lecture Slides, Graduate School of Information Science and Technology, Osaka University, 2025.
+
+\end{thebibliography}
+
+\end{document}

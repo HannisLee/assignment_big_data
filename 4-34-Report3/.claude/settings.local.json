@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem *)",
+      "Bash(Get-ChildItem -Path \"D:\\\\Dev\\\\assignment_big_data\\\\4-34-Report3\" -Recurse -Filter \"*.pdf\")",
+      "Bash(Select-Object FullName, Length)",
+      "Bash(conda env *)",
+      "WebSearch"
+    ]
+  }
+}

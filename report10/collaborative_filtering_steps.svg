@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="300" viewBox="0 0 820 300">
+<style>
+  text { font-family: Arial, Helvetica, sans-serif; fill: #2c3e50; }
+  .title { font-size: 22px; font-weight: 700; }
+  .subtitle { font-size: 13px; fill: #7f8c8d; }
+  .label { font-size: 13px; }
+  .small { font-size: 12px; fill: #7f8c8d; }
+  .value { font-size: 13px; font-weight: 700; }
+</style>
+<rect width="100%" height="100%" fill="white"/>
+<text x="32" y="40" class="title" text-anchor="start">Collaborative Filtering Pipeline</text>
+<text x="32" y="63" class="subtitle" text-anchor="start">From target user to top-1 recommendation.</text>
+<rect x="34" y="96" width="132" height="82" rx="8" fill="#f7fafc" stroke="#d6dee6" stroke-width="2"/>
+<text x="100.0" y="127" class="label" text-anchor="middle" fill="#2c3e50" font-weight="700">Target user</text>
+<text x="100.0" y="153" class="small" text-anchor="middle" fill="#7f8c8d">u6 = [1,1,0,1,0,0]</text>
+<line x1="178" y1="137.0" x2="194" y2="137.0" stroke="#7f8c8d" stroke-width="2"/>
+<polygon points="194,137.0 186,133.0 186,141.0" fill="#7f8c8d"/>
+<rect x="206" y="96" width="132" height="82" rx="8" fill="#f7fafc" stroke="#d6dee6" stroke-width="2"/>
+<text x="272.0" y="127" class="label" text-anchor="middle" fill="#2c3e50" font-weight="700">Similarity</text>
+<text x="272.0" y="153" class="small" text-anchor="middle" fill="#7f8c8d">inner product</text>
+<line x1="350" y1="137.0" x2="366" y2="137.0" stroke="#7f8c8d" stroke-width="2"/>
+<polygon points="366,137.0 358,133.0 358,141.0" fill="#7f8c8d"/>
+<rect x="378" y="96" width="132" height="82" rx="8" fill="#f7fafc" stroke="#d6dee6" stroke-width="2"/>
+<text x="444.0" y="127" class="label" text-anchor="middle" fill="#2c3e50" font-weight="700">Top-2 users</text>
+<text x="444.0" y="153" class="small" text-anchor="middle" fill="#7f8c8d">user 1, user 4</text>
+<line x1="522" y1="137.0" x2="538" y2="137.0" stroke="#7f8c8d" stroke-width="2"/>
+<polygon points="538,137.0 530,133.0 530,141.0" fill="#7f8c8d"/>
+<rect x="550" y="96" width="132" height="82" rx="8" fill="#f7fafc" stroke="#d6dee6" stroke-width="2"/>
+<text x="616.0" y="127" class="label" text-anchor="middle" fill="#2c3e50" font-weight="700">Candidates</text>
+<text x="616.0" y="153" class="small" text-anchor="middle" fill="#7f8c8d">item 3, 5, 6</text>
+<line x1="694" y1="137.0" x2="692" y2="137.0" stroke="#7f8c8d" stroke-width="2"/>
+<polygon points="692,137.0 684,133.0 684,141.0" fill="#7f8c8d"/>
+<rect x="704" y="96" width="82" height="82" rx="8" fill="#fff4e7" stroke="#e67e22" stroke-width="2"/>
+<text x="745.0" y="127" class="label" text-anchor="middle" fill="#2c3e50" font-weight="700">Result</text>
+<text x="745.0" y="153" class="small" text-anchor="middle" fill="#e67e22">item 5</text>
+<polyline points="82,220 744,220" fill="none" stroke="#edf1f5" stroke-width="2"/>
+<text x="82" y="248" class="small" text-anchor="middle">sim: user1=2, user4=2</text>
+<text x="412" y="248" class="small" text-anchor="middle">p(item5)=1+1=2</text>
+<text x="744" y="248" class="small" text-anchor="middle">highest score</text>
+</svg>
